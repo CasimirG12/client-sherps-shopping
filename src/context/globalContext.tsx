@@ -1,23 +1,23 @@
-import {
-  createContext,
-  ReactNode,
-  useState,
-  useContext,
-  useEffect,
-} from "react";
-import { Item } from "../types/item";
+import { createContext, ReactNode, useContext, useState } from "react";
+import { ShoppingList } from "../types/shoppingList";
+import { Recipe } from "../types/recipe";
+import { useAuthContext } from "./authContext";
 
 export type GlobalContextType = {
-  theme: string;
-  setTheme: (theme: string) => void;
-  items: Item[];
-  fetchItems: () => void;
-  deleteItem: (id: number) => void;
-  addItem: (item: Item) => void;
-  calcLeftOverBudget: () => number;
-  setNewBudget: (budget: number) => void;
-  budget: number;
-  fetchBudget: () => void;
+  shoppingLists: ShoppingList[];
+  recipes: Recipe[];
+  fetchShoppingLists: () => Promise<ShoppingList[]>;
+  addIngredientToShoppingList: (
+    shoppingListId: number,
+    ingredientName: string,
+    quantity: number
+  ) => Promise<void>;
+  addShoppingList: (slName: string) => Promise<void>;
+  deleteShoppingList: (id: number) => Promise<void>;
+  deleteIngredientFromShoppingList: (
+    shoppingListId: number,
+    ingredientId: number
+  ) => Promise<void>;
 };
 
 const globalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -31,128 +31,169 @@ export const useGlobalContext = () => {
 };
 
 const GlobalProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState("light");
-  const [items, setItems] = useState<Item[]>([]);
-  const [budget, setBudget] = useState(0);
+  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const { user } = useAuthContext();
 
-  const calculateTotal = () => {
-    let total = 0;
-    items.forEach((item) => {
-      total += item.price * item.quantity;
-    });
-    return total;
+  const fetchShoppingLists = async (): Promise<ShoppingList[]> => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/shopping-lists/${user?.id}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data && Array.isArray(data)) {
+        setShoppingLists(data);
+        return data;
+      } else {
+        return [] as ShoppingList[];
+      }
+    } catch (error) {
+      console.error("Failed to fetch shopping lists:", error);
+      return [] as ShoppingList[];
+    }
   };
 
-  const setNewBudget = async (budget: number) => {
-    setBudget(budget);
+  const addIngredientToShoppingList = async (
+    shoppingListId: number,
+    ingredientName: string,
+    quantity: number
+  ): Promise<void> => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch("http://localhost:5000/api/budget", {
+      const response = await fetch(
+        `${API_BASE_URL}/api/shopping-lists/${shoppingListId}/ingredients`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ingredientName: ingredientName,
+            quantity: quantity,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+
+      const updatedShoppingLists = await fetchShoppingLists();
+      setShoppingLists(updatedShoppingLists);
+    } catch (error) {
+      console.error("Failed to add ingredient to shopping list:", error);
+    }
+  };
+
+  const addShoppingList = async (slName: string) => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/shopping-lists`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ budget }),
+        body: JSON.stringify({
+          name: slName,
+          user_id: user?.id,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to set new budget");
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
+
+      const updatedShoppingLists = await fetchShoppingLists();
+      setShoppingLists(updatedShoppingLists);
     } catch (error) {
-      console.error("Error setting new budget:", error);
+      console.error("Failed to add shopping list: ", error);
     }
   };
 
-  const calcLeftOverBudget = () => {
-    return budget - calculateTotal();
-  };
-
-  // Fetch items from the backend
-  const fetchItems = async () => {
+  const deleteShoppingList = async (id: number) => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch("http://localhost:5000/api/items"); // Backend URL
-      if (!response.ok) {
-        throw new Error("Failed to fetch items");
-      }
-      const data = await response.json();
-      setItems(data); // Set items from the backend
-    } catch (error) {
-      console.error("Error fetching items:", error);
-    }
-  };
-
-  // Delete an item and update the backend
-  const deleteItem = async (id: number) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/items/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/shopping-lists/`, {
         method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete item");
-      }
-
-      // Remove item from local state if deletion was successful
-      const newItems = items.filter((item) => item.id !== id);
-      setItems(newItems);
-    } catch (error) {
-      console.error("Error deleting item:", error);
-    }
-  };
-
-  const addItem = async (item: Item) => {
-    try {
-      // Optimistic UI update: add item to local state immediately
-      setItems((prevItems) => [...prevItems, item]);
-
-      const response = await fetch("http://localhost:5000/api/items", {
-        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(item),
+        body: JSON.stringify({
+          id: id,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add item");
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
-      fetchItems();
+
+      const updatedShoppingLists = shoppingLists.filter((sl) => sl.id !== id);
+      setShoppingLists(updatedShoppingLists);
     } catch (error) {
-      console.error("Error adding item:", error);
+      console.error("Failed to add shopping list: ", error);
     }
   };
 
-  const fetchBudget = async () => {
+  const _removeIngredientFromList = (
+    shoppingListId: number,
+    ingredientId: number
+  ) => {
+    setShoppingLists((prevShoppingLists) => {
+      return prevShoppingLists.map((list) => {
+        if (list.id === shoppingListId) {
+          // Remove the ingredient from the list's ingredients array
+          return {
+            ...list,
+            ingredients: list.ingredients.filter(
+              (ingredient) => ingredient.id !== ingredientId
+            ),
+          };
+        }
+        return list;
+      });
+    });
+  };
+
+  const deleteIngredientFromShoppingList = async (
+    shoppingListId: number,
+    ingredientId: number
+  ): Promise<void> => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch("http://localhost:5000/api/budget");
+      const response = await fetch(
+        `${API_BASE_URL}/api/shopping-lists/ingredients/${shoppingListId}/${ingredientId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!response.ok) {
-        throw new Error("Failed to fetch budget");
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
-      const data = await response.json();
-      setBudget(data.budget);
+      _removeIngredientFromList(shoppingListId, ingredientId);
     } catch (error) {
-      console.error("Error fetching budget:", error);
+      console.error("Failed to delete ingredient from shopping list: ", error);
     }
   };
-
-  // Fetch items when the component mounts
-  useEffect(() => {
-    console.log("Fetching items...");
-    fetchItems();
-  }, []); // Empty dependency array ensures it runs once when the component mounts
 
   return (
     <globalContext.Provider
       value={{
-        theme,
-        setTheme,
-        items,
-        fetchItems,
-        deleteItem,
-        addItem,
-        calcLeftOverBudget,
-        setNewBudget,
-        budget,
-        fetchBudget,
+        shoppingLists,
+        recipes,
+        fetchShoppingLists,
+        addIngredientToShoppingList,
+        addShoppingList,
+        deleteShoppingList,
+        deleteIngredientFromShoppingList,
       }}
     >
       {children}
