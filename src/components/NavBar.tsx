@@ -31,6 +31,14 @@ const NavBar = () => {
         >
           Recipes
         </NavLink>
+        <NavLink
+          to="/meal-plan"
+          className={({ isActive }) =>
+            isActive ? "text-yellow-300 font-bold" : "text-white"
+          }
+        >
+          Meal Plan
+        </NavLink>
       </div>
       <Link to="/login" onClick={() => logout()}>
         Log Out

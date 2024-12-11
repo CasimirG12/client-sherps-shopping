@@ -3,6 +3,8 @@ import { Ingredient } from "./ingredient";
 export interface Recipe {
   id: number;
   name: string;
-  dateCreated: Date;
+  dateCreated: string;
+  username: string;
   ingredients: Ingredient[];
+  description: string;
 }

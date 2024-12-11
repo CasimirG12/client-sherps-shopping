@@ -97,7 +97,7 @@ const ShoppingListDetail = () => {
                 <p>{shoppingList.username}</p>
               </div>
               <form
-                onSubmit={(e) => onOpen(e)} // Prevent form submission
+                onSubmit={(e) => onOpen(e)}
                 className="flex flex-row gap-2 items-center justify-center"
               >
                 <input

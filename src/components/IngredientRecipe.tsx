@@ -2,22 +2,22 @@ import React, { useState, useEffect, useRef } from "react";
 import { Ingredient } from "../types/ingredient";
 import { FaTrash } from "react-icons/fa";
 import { useGlobalContext } from "../context/globalContext";
-import { ShoppingList } from "../types/shoppingList";
 import UnitSelector from "./UnitSelector";
+import { Recipe } from "../types/recipe";
 
-interface IngredientShoppingListProps {
+interface IngredientRecipeProps {
   item: Ingredient;
-  shoppingList: ShoppingList;
+  recipe: Recipe;
 }
 
-const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
+const IngredientRecipe: React.FC<IngredientRecipeProps> = ({
   item,
-  shoppingList,
+  recipe,
 }) => {
   const {
-    deleteIngredientFromShoppingList,
-    editValueIngredientShoppingList,
-    editUnitIngredientShoppingList,
+    editUnitIngredientRecipe,
+    editValueIngredientRecipe,
+    deleteIngredientFromRecipe,
   } = useGlobalContext();
   const [quantityEdit, setQuantityEdit] = useState<boolean>(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -29,7 +29,7 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
     ingredientId: number,
     quantity: number
   ) => {
-    editValueIngredientShoppingList(shoppingListId, ingredientId, quantity);
+    editValueIngredientRecipe(shoppingListId, ingredientId, quantity);
     setQuantityEdit(false);
   };
 
@@ -41,7 +41,7 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
         !formRef.current.contains(event.target as Node)
       ) {
         console.log(inputRef.current);
-        handleSubmit(shoppingList.id, item.id, Number(inputRef.current?.value));
+        handleSubmit(recipe.id, item.id, Number(inputRef.current?.value));
       }
     };
 
@@ -49,7 +49,7 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [quantityEdit, shoppingList.id, item.id]);
+  }, [quantityEdit, recipe.id, item.id]);
 
   useEffect(() => {
     if (quantityEdit && inputRef.current) {
@@ -80,19 +80,15 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
         )}
         <UnitSelector
           currentUnit={item.unit}
-          shoppingListId={shoppingList.id}
+          shoppingListId={recipe.id}
           ingredientId={item.id}
-          editUnitIngredientLocation={editUnitIngredientShoppingList}
+          editUnitIngredientLocation={editUnitIngredientRecipe}
         />
         <p>{item.name}</p>
       </div>
-      <FaTrash
-        onClick={() =>
-          deleteIngredientFromShoppingList(shoppingList.id, item.id)
-        }
-      />
+      <FaTrash onClick={() => deleteIngredientFromRecipe(recipe.id, item.id)} />
     </div>
   );
 };
 
-export default IngredientShoppingList;
+export default IngredientRecipe;

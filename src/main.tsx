@@ -11,6 +11,8 @@ import Recipes from "./routes/Authenticated/Recipes.tsx";
 import ShoppingLists from "./routes/Authenticated/ShoppingLists.tsx";
 import LoggedInLayout from "./routes/Authenticated/LoggedInLayout.tsx";
 import ShoppingListDetail from "./routes/Authenticated/ShoppingListDetail.tsx";
+import RecipeDetail from "./routes/Authenticated/RecipeDetail.tsx";
+import MealPlan from "./routes/Authenticated/MealPlan.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -22,10 +24,13 @@ createRoot(document.getElementById("root")!).render(
             <Route path="login" element={<Login />} />
             <Route element={<LoggedInLayout />}>
               <Route path="home" element={<Home />} />
-              <Route path="recipes" element={<Recipes />} />
+              <Route path="recipes" element={<Recipes />}>
+                <Route path=":id" element={<RecipeDetail />} />
+              </Route>
               <Route path="shopping-lists" element={<ShoppingLists />}>
                 <Route path=":id" element={<ShoppingListDetail />} />
               </Route>
+              <Route path="/meal-plan" element={<MealPlan />} />
             </Route>
           </Routes>
         </GlobalProvider>

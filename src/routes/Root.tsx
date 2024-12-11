@@ -6,14 +6,14 @@ const Root: React.FC = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
 
+  // Navigate based on the user's authentication status
   useEffect(() => {
-    console.log("firing root");
     if (user) {
-      navigate("/home");
-    } else {
-      navigate("/login");
+      navigate("/home"); // Redirect authenticated users to home
+    } else if (user === null) {
+      navigate("/login"); // Redirect unauthenticated users to login
     }
-  }, [user, navigate]);
+  }, [user, navigate]); // Only re-run if `user` or `navigate` changes
 
   return <Outlet />;
 };

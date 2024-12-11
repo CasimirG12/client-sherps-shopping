@@ -1,12 +1,47 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import { ShoppingList } from "../types/shoppingList";
-import { Recipe } from "../types/recipe";
 import { useAuthContext } from "./authContext";
+import { Recipe } from "../types/recipe";
+import {
+  _removeIngredientFromRecipe,
+  deleteIngredientFromRecipeAPI,
+  deleteRecipeAPI,
+  editUnitIngredientRecipeAPI,
+  editValueIngredientRecipeAPI,
+  fetchRecipesAPI,
+} from "../utils/recipeAPI";
+import {
+  _removeIngredientFromList,
+  addIngredientToShoppingListAPI,
+  addShoppingListAPI,
+  deleteIngredientFromShoppingListAPI,
+  deleteShoppingListAPI,
+  editUnitIngredientShoppingListAPI,
+  editValueIngredientShoppingListAPI,
+  fetchShoppingListsAPI,
+} from "../utils/shoppingListAPI";
+import { MeasureUnit } from "../types/ingredient";
 
 export type GlobalContextType = {
   shoppingLists: ShoppingList[];
   recipes: Recipe[];
-  fetchShoppingLists: () => Promise<ShoppingList[]>;
+  fetchShoppingLists: () => Promise<void>;
+  fetchRecipes: () => Promise<void>;
+  deleteRecipe: (id: number) => Promise<void>;
+  editUnitIngredientRecipe: (
+    recipeId: number,
+    ingredientId: number,
+    unit: MeasureUnit
+  ) => Promise<void>;
+  editValueIngredientRecipe: (
+    recipeId: number,
+    ingredientId: number,
+    quantity: number
+  ) => Promise<void>;
+  deleteIngredientFromRecipe: (
+    recipeId: number,
+    ingredientId: number
+  ) => Promise<void>;
   addIngredientToShoppingList: (
     shoppingListId: number,
     ingredientName: string,
@@ -17,6 +52,16 @@ export type GlobalContextType = {
   deleteIngredientFromShoppingList: (
     shoppingListId: number,
     ingredientId: number
+  ) => Promise<void>;
+  editValueIngredientShoppingList: (
+    shoppingListId: number,
+    ingredientId: number,
+    quantity: number
+  ) => Promise<void>;
+  editUnitIngredientShoppingList: (
+    shoppingListId: number,
+    ingredientId: number,
+    unit: MeasureUnit
   ) => Promise<void>;
 };
 
@@ -35,29 +80,29 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const { user } = useAuthContext();
 
-  const fetchShoppingLists = async (): Promise<ShoppingList[]> => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
-
+  const fetchShoppingLists = async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/shopping-lists/${user?.id}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      if (!user) {
+        return;
       }
-
-      const data = await response.json();
-
-      if (data && Array.isArray(data)) {
-        setShoppingLists(data);
-        return data;
-      } else {
-        return [] as ShoppingList[];
-      }
+      const fetchedShoppingLists = await fetchShoppingListsAPI(user.id);
+      setShoppingLists(fetchedShoppingLists);
     } catch (error) {
-      console.error("Failed to fetch shopping lists:", error);
-      return [] as ShoppingList[];
+      console.error("Failed to fetch Shopping Lists: ", error);
+      return;
+    }
+  };
+
+  const fetchRecipes = async (): Promise<void> => {
+    try {
+      if (!user) {
+        return;
+      }
+      const fetchedRecipes = await fetchRecipesAPI(user.id);
+      setRecipes(fetchedRecipes);
+    } catch (error) {
+      console.error("Failed to fetch recipes: ", error);
+      return;
     }
   };
 
@@ -66,75 +111,33 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
     ingredientName: string,
     quantity: number
   ): Promise<void> => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/shopping-lists/${shoppingListId}/ingredients`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ingredientName: ingredientName,
-            quantity: quantity,
-          }),
-        }
+      await addIngredientToShoppingListAPI(
+        shoppingListId,
+        ingredientName,
+        quantity
       );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
-      }
-
-      const updatedShoppingLists = await fetchShoppingLists();
-      setShoppingLists(updatedShoppingLists);
+      await fetchShoppingLists();
     } catch (error) {
       console.error("Failed to add ingredient to shopping list:", error);
     }
   };
 
   const addShoppingList = async (slName: string) => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/shopping-lists`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: slName,
-          user_id: user?.id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      if (!user) {
+        return;
       }
-
-      const updatedShoppingLists = await fetchShoppingLists();
-      setShoppingLists(updatedShoppingLists);
+      await addShoppingListAPI(slName, user.id);
+      await fetchShoppingLists();
     } catch (error) {
       console.error("Failed to add shopping list: ", error);
     }
   };
 
   const deleteShoppingList = async (id: number) => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/shopping-lists/`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: id,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
-      }
-
+      await deleteShoppingListAPI(id);
       const updatedShoppingLists = shoppingLists.filter((sl) => sl.id !== id);
       setShoppingLists(updatedShoppingLists);
     } catch (error) {
@@ -142,45 +145,97 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const _removeIngredientFromList = (
-    shoppingListId: number,
-    ingredientId: number
-  ) => {
-    setShoppingLists((prevShoppingLists) => {
-      return prevShoppingLists.map((list) => {
-        if (list.id === shoppingListId) {
-          // Remove the ingredient from the list's ingredients array
-          return {
-            ...list,
-            ingredients: list.ingredients.filter(
-              (ingredient) => ingredient.id !== ingredientId
-            ),
-          };
-        }
-        return list;
-      });
-    });
+  const deleteRecipe = async (id: number) => {
+    try {
+      await deleteRecipeAPI(id);
+      const updatedRecipes = recipes.filter((sl) => sl.id !== id);
+      setRecipes(updatedRecipes);
+    } catch (error) {
+      console.error("Failed to add shopping list: ", error);
+    }
   };
 
   const deleteIngredientFromShoppingList = async (
     shoppingListId: number,
     ingredientId: number
   ): Promise<void> => {
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/shopping-lists/ingredients/${shoppingListId}/${ingredientId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} - ${response.statusText}`);
-      }
-      _removeIngredientFromList(shoppingListId, ingredientId);
+      await deleteIngredientFromShoppingListAPI(shoppingListId, ingredientId);
+      _removeIngredientFromList(shoppingListId, ingredientId, setShoppingLists);
     } catch (error) {
       console.error("Failed to delete ingredient from shopping list: ", error);
+    }
+  };
+
+  const deleteIngredientFromRecipe = async (
+    recipeId: number,
+    ingredientId: number
+  ): Promise<void> => {
+    try {
+      await deleteIngredientFromRecipeAPI(recipeId, ingredientId);
+      _removeIngredientFromRecipe(recipeId, ingredientId, setRecipes);
+    } catch (error) {
+      console.error("Failed to delete ingredient from shopping list: ", error);
+    }
+  };
+
+  const editValueIngredientShoppingList = async (
+    shoppingListId: number,
+    ingredientId: number,
+    quantity: number
+  ): Promise<void> => {
+    try {
+      await editValueIngredientShoppingListAPI(
+        shoppingListId,
+        ingredientId,
+        quantity
+      );
+      await fetchShoppingLists();
+    } catch (error) {
+      console.error("Failed to update ingredient quantity: ", error);
+    }
+  };
+
+  const editValueIngredientRecipe = async (
+    recipeId: number,
+    ingredientId: number,
+    quantity: number
+  ): Promise<void> => {
+    try {
+      await editValueIngredientRecipeAPI(recipeId, ingredientId, quantity);
+      await fetchRecipes();
+    } catch (error) {
+      console.error("Failed to update ingredient quantity: ", error);
+    }
+  };
+
+  const editUnitIngredientShoppingList = async (
+    shoppingListId: number,
+    ingredientId: number,
+    unit: MeasureUnit
+  ): Promise<void> => {
+    try {
+      await editUnitIngredientShoppingListAPI(
+        shoppingListId,
+        ingredientId,
+        unit
+      );
+      await fetchShoppingLists();
+    } catch (error) {
+      console.error("Failed to update ingredient quantity: ", error);
+    }
+  };
+
+  const editUnitIngredientRecipe = async (
+    recipeId: number,
+    ingredientId: number,
+    unit: MeasureUnit
+  ): Promise<void> => {
+    try {
+      await editUnitIngredientRecipeAPI(recipeId, ingredientId, unit);
+      await fetchRecipes();
+    } catch (error) {
+      console.error("Failed to update ingredient quantity: ", error);
     }
   };
 
@@ -189,11 +244,18 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
       value={{
         shoppingLists,
         recipes,
+        deleteRecipe,
+        editUnitIngredientRecipe,
+        editValueIngredientRecipe,
+        deleteIngredientFromRecipe,
         fetchShoppingLists,
         addIngredientToShoppingList,
         addShoppingList,
         deleteShoppingList,
         deleteIngredientFromShoppingList,
+        fetchRecipes,
+        editValueIngredientShoppingList,
+        editUnitIngredientShoppingList,
       }}
     >
       {children}
