@@ -22,6 +22,14 @@ export default {
           '100%': { maxHeight: '0px', opacity: 0, visibility: 'hidden' },     // Collapse to zero height
         },
       },
+      height: {
+        "1/12": '8.333333%',
+        "2/12": '16.666667%',
+        "4/12": '33.333333%',
+        "5/12": '41.666667%',
+        "11/12": '91.666667%',
+
+      }
     },
   },
   plugins: [],

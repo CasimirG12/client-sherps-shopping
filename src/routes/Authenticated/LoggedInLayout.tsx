@@ -14,7 +14,7 @@ const LoggedInLayout = () => {
   }, [user, navigate]);
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-tr from-slate-500 to-slate-800">
+    <div className="w-screen h-screen bg-gradient-to-r from-yellow-500 to-orange-500">
       <NavBar />
       <Outlet />
     </div>

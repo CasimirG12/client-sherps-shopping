@@ -6,6 +6,8 @@ interface IngredientStepProps {
   step: string;
   steps: string[];
   setSteps: React.Dispatch<React.SetStateAction<string[]>>;
+  stepsChanged: boolean;
+  setStepsChanged: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const IngredientStep: React.FC<IngredientStepProps> = ({
@@ -13,6 +15,8 @@ const IngredientStep: React.FC<IngredientStepProps> = ({
   step,
   steps,
   setSteps,
+  stepsChanged,
+  setStepsChanged,
 }) => {
   const [edit, setEdit] = useState<boolean>(false);
   const [editedStep, setEditedStep] = useState<string>(step);
@@ -26,8 +30,8 @@ const IngredientStep: React.FC<IngredientStepProps> = ({
   }, [edit]); // Trigger on edit state change
 
   const handleAddStep = (e: React.MouseEvent) => {
+    if (!stepsChanged) setStepsChanged(true);
     e.stopPropagation();
-    // Update the steps array with the edited step
     const updatedSteps = [...steps];
     updatedSteps[index] = editedStep;
     setSteps(updatedSteps);
@@ -36,11 +40,11 @@ const IngredientStep: React.FC<IngredientStepProps> = ({
 
   return (
     <div
-      className="border-b-2 border-b-slate-700 p-2 animate-slideDownHeight flex flex-row items-center gap-2"
+      className="border-b border-b-slate-700 p-2 animate-slideDownHeight flex flex-row items-center gap-2"
       key={index}
       onClick={() => setEdit(true)} // Set edit mode when clicked
     >
-      <p>Step {index + 1}:</p>
+      <p className="font-bold text-slate-700">Step {index + 1}:</p>
       {!edit ? (
         <p>{editedStep}</p>
       ) : (

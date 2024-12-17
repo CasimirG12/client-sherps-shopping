@@ -84,7 +84,7 @@ const ShoppingListDetail = () => {
   };
 
   return (
-    <div className="w-screen">
+    <>
       {shoppingList && (
         <>
           <div className="flex flex-row bg-slate-800 w-full pl-4 py-2 items-center gap-2">
@@ -147,7 +147,7 @@ const ShoppingListDetail = () => {
           </form>
         </div>
       </Modal>
-    </div>
+    </>
   );
 };
 

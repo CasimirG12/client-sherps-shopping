@@ -41,7 +41,7 @@ const Login = () => {
     });
   };
   return (
-    <div className="w-screen h-screen bg-gradient-to-tr from-slate-600 to-slate-800 flex flex-col items-center justify-center">
+    <div className="w-screen h-screen bg-gradient-to-tr from-cyan-500 to-blue-500 flex flex-col items-center justify-center">
       <form
         onSubmit={(e) => onSubmit(e)}
         className="flex flex-col items-center gap-3 w-11/12 bg-slate-200 p-4 shadow-md shadow-slate-900 rounded-sm"

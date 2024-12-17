@@ -19,6 +19,7 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
   editUnitIngredientLocation,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [ready, setReady] = useState<boolean>(false);
   const [selectedUnit, setSelectedUnit] = useState<MeasureUnit>(
     currentUnit === null ? "pc." : currentUnit
   );
@@ -28,6 +29,7 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
   const units: MeasureUnit[] = ["pc.", "g", "kg", "ml", "l"];
 
   useEffect(() => {
+    setReady(true);
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -54,22 +56,24 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Unit Selector Button */}
       <div
-        onClick={() => setOpen(!open)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
         className={`cursor-pointer rounded flex items-center justify-center p-2 ${
           open ? "bg-gray-500 border" : ""
         }`}
       >
         {selectedUnit}
       </div>
-
-      {/* Dropdown Menu */}
       <div
         className={`${
-          open
-            ? "animate-slideDownHeight opacity-100 visibility-visible" // When open, slide down and fade in
-            : "animate-slideUpHeight opacity-0 visibility-hidden" // When closed, slide up and fade out
+          ready
+            ? open
+              ? "animate-slideDownHeight opacity-100 visibility-visible"
+              : "animate-slideUpHeight opacity-0 visibility-hidden"
+            : "opacity-0 visibility-hidden"
         } absolute top-10 bg-white border z-10 rounded shadow-lg overflow-hidden`}
         style={{ maxHeight: open ? "200px" : "0px" }} // Control the height during the animation
       >

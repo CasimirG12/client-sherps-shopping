@@ -15,7 +15,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
   return (
     <div
       onClick={() => navigate(`/recipes/${recipe.id}`)}
-      className="active:scale-95 flex flex-row items-center justify-between duration-200 w-11/12  bg-slate-500 p-4 rounded-md shadow-black shadow-sm"
+      className="active:scale-95 flex flex-row items-center justify-between duration-200 w-11/12  bg-slate-500 p-4 rounded-md shadow-black shadow-sm hover:cursor-pointer"
     >
       <p>
         {recipe.name} created by {recipe.username}

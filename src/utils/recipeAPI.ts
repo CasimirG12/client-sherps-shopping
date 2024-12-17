@@ -150,3 +150,53 @@ export const deleteIngredientFromRecipeAPI = async (
     console.error("Failed to delete ingredient from shopping recipe: ", error);
   }
 };
+
+export const addIngredientToRecipeAPI = async (
+  recipeId: number,
+  ingredientName: string,
+  quantity: number
+): Promise<void> => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/recipes/${recipeId}/ingredients`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ingredientName: ingredientName,
+          quantity: quantity,
+        }),
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+
+  } catch (error) {
+    console.error("Failed to add ingredient to recipe:", error);
+  }
+};
+
+export const addRecipeIngredientsToSLAPI = async (recipeId: number, shoppingListId: number): Promise<void> => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}/shopping_lists/${shoppingListId}/ingredients`,{
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Failed to add ingredients from recipe to shopping list:", error);
+  }
+}

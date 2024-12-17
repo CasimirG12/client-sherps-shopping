@@ -14,7 +14,7 @@ const Modal: React.FC<ModalProps> = ({ onClose, open, children }) => {
         open ? "visible" : "invisible"
       }`}
     >
-      <div className="bg-white pt-8 p-4 rounded-md flex flex-col justify-center items-center relative">
+      <div className="bg-slate-500 shadow-md shadow-black pt-8 p-4 rounded-md flex flex-col justify-center items-center relative">
         <FaX onClick={() => onClose()} className=" absolute right-4 top-4" />
         {children}
       </div>

@@ -6,13 +6,28 @@ import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import IngredientStep from "../../components/IngredientStep";
 import IngredientRecipe from "../../components/IngredientRecipe";
 import Modal from "../../components/Modal";
+import ModalAddIngredient from "../../components/ModalAddIngredient";
+import LikeCounter from "../../components/LikeCounter";
+import { FaFloppyDisk } from "react-icons/fa6";
 
 const RecipeDetail = () => {
-  const { recipes } = useGlobalContext();
+  const { recipes, addIngredientToRecipe, addRecipeIngredientsToSL } =
+    useGlobalContext();
   const { id } = useParams();
   const [recipe, setRecipe] = useState<Recipe | undefined>(undefined);
+
   const [steps, setSteps] = useState<string[]>([]);
+  const [stepsChanged, setStepsChanged] = useState<boolean>(false);
+
   const navigate = useNavigate();
+  const [newIngredientName, setNewIngredientName] = useState<
+    string | undefined
+  >(undefined);
+  const [newIngredientQuantity, setNewIngredientQuantity] = useState<
+    number | undefined
+  >(undefined);
+  const [modalAddIngredient, setModalAddIngredient] = useState<boolean>(false);
+  const [modalAddToSL, setModalAddToSL] = useState<boolean>(false);
 
   useEffect(() => {
     if (!id) return;
@@ -31,17 +46,35 @@ const RecipeDetail = () => {
     setSteps(updatedSteps);
   };
 
-  const [modalAddIngredient, setModalAddIngredient] = useState<boolean>(false);
-
-  const closeModal = () => {
+  const closeAddIngredientModal = () => {
     setModalAddIngredient(false);
+    setNewIngredientName(undefined);
+    setNewIngredientQuantity(undefined);
+  };
+
+  const closeAddToSLModal = () => {
+    setModalAddToSL(false);
+  };
+
+  const handleAddIngredient = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (recipe && newIngredientName && newIngredientQuantity) {
+      addIngredientToRecipe(
+        recipe.id,
+        newIngredientName,
+        newIngredientQuantity
+      );
+      closeAddIngredientModal();
+      return;
+    }
+    return;
   };
 
   return (
     <>
       {recipe && (
-        <div>
-          <div className="w-full bg-slate-800 p-2 flex flex-col item-center">
+        <>
+          <div className="w-full h-[15vh] bg-slate-800 p-2 flex flex-col item-center justify-evenly">
             <div className="flex flex-row items-center text-white gap-2">
               <FaArrowLeft
                 size={20}
@@ -52,49 +85,80 @@ const RecipeDetail = () => {
             </div>
             <p className="text-gray-500">created on: {recipe.dateCreated}</p>
             <p className="text-gray-500">created by: {recipe.username}</p>
+            <LikeCounter recipeId={recipe.id} />
           </div>
-          <div>
-            <div className="bg-slate-700 p-2 font-bold text-white">
+          <div className="h-[35vh]">
+            <div className="bg-slate-700 p-2 font-bold text-white flex flex-row gap-2 h-[6vh] items-center">
               <p>Ingredients</p>
               <button onClick={() => setModalAddIngredient(true)}>
                 <FaPlus />
               </button>
             </div>
-            <div>
-              {recipe.ingredients.map((ingredient) => {
-                return <IngredientRecipe item={ingredient} recipe={recipe} />;
+            <div className="overflow-y-auto max-h-[29vh]">
+              {recipe.ingredients.map((ingredient, index) => {
+                return (
+                  <IngredientRecipe
+                    item={ingredient}
+                    recipe={recipe}
+                    key={`ing-${index}`}
+                  />
+                );
               })}
             </div>
           </div>
-          <div>
-            <div className="bg-slate-700 p-2 font-bold text-white flex flex-row gap-2 items-center">
+          <div className="h-[35vh]">
+            <div className="bg-slate-700 p-2 font-bold text-white flex flex-row gap-2 items-center h-[6vh]">
               <p>Description</p>
               <button onClick={() => addStep()}>
                 <FaPlus />
               </button>
+              <button disabled={!stepsChanged} className="disabled:opacity-20">
+                <FaFloppyDisk />
+              </button>
             </div>
-            <div>
+            <div className="h-[29vh] overflow-y-auto">
               {steps.map((step, index) => (
                 <IngredientStep
                   step={step}
                   index={index}
                   steps={steps}
                   setSteps={setSteps}
+                  stepsChanged={stepsChanged}
+                  setStepsChanged={setStepsChanged}
                   key={`st-${index}`}
                 />
               ))}
             </div>
           </div>
-        </div>
+          <div className="flex items-center justify-center h-[10vh] bg-slate-700">
+            <button
+              className="bg-yellow-400 w-[95vw] py-4 rounded-md font-bold shadow-md shadow-slate-800 text-lg active:scale-95 active:opacity-80 duration-200"
+              onClick={() => setModalAddToSL(true)}
+            >
+              Add to Shopping List
+            </button>
+          </div>
+        </>
       )}
       {modalAddIngredient && (
-        <Modal onClose={closeModal} open={modalAddIngredient}>
-          <form className="flex flex-col items-center justify-center">
-            <label>
-              Which ingredient would you like to add?
-              <input type="text" />
-            </label>
-            <button>Add</button>
+        <ModalAddIngredient
+          closeAddIngredientModal={closeAddIngredientModal}
+          modalAddIngredient={modalAddIngredient}
+          handleAddIngredient={handleAddIngredient}
+          newIngredientName={newIngredientName}
+          setNewIngredientName={setNewIngredientName}
+          newIngredientQuantity={newIngredientQuantity}
+          setNewIngredientQuantity={setNewIngredientQuantity}
+        />
+      )}
+      {modalAddToSL && (
+        <Modal onClose={closeAddToSLModal} open={modalAddToSL}>
+          <form
+            onSubmit={() => {
+              if (recipe) addRecipeIngredientsToSL(recipe.id, 16);
+            }}
+          >
+            <button type="submit">Add Ingredients</button>
           </form>
         </Modal>
       )}

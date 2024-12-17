@@ -4,6 +4,8 @@ import { useAuthContext } from "./authContext";
 import { Recipe } from "../types/recipe";
 import {
   _removeIngredientFromRecipe,
+  addIngredientToRecipeAPI,
+  addRecipeIngredientsToSLAPI,
   deleteIngredientFromRecipeAPI,
   deleteRecipeAPI,
   editUnitIngredientRecipeAPI,
@@ -42,6 +44,11 @@ export type GlobalContextType = {
     recipeId: number,
     ingredientId: number
   ) => Promise<void>;
+  addIngredientToRecipe: (
+    recipeId: number,
+    ingredientName: string,
+    quantity: number
+  ) => Promise<void>;
   addIngredientToShoppingList: (
     shoppingListId: number,
     ingredientName: string,
@@ -62,6 +69,10 @@ export type GlobalContextType = {
     shoppingListId: number,
     ingredientId: number,
     unit: MeasureUnit
+  ) => Promise<void>;
+  addRecipeIngredientsToSL: (
+    recipeId: number,
+    shoppingListId: number
   ) => Promise<void>;
 };
 
@@ -120,6 +131,19 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
       await fetchShoppingLists();
     } catch (error) {
       console.error("Failed to add ingredient to shopping list:", error);
+    }
+  };
+
+  const addIngredientToRecipe = async (
+    recipeId: number,
+    ingredientName: string,
+    quantity: number
+  ): Promise<void> => {
+    try {
+      await addIngredientToRecipeAPI(recipeId, ingredientName, quantity);
+      await fetchRecipes();
+    } catch (error) {
+      console.error("Failed to add ingredient to recipe:", error);
     }
   };
 
@@ -239,6 +263,20 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const addRecipeIngredientsToSL = async (
+    recipeId: number,
+    shoppingListId: number
+  ): Promise<void> => {
+    try {
+      await addRecipeIngredientsToSLAPI(recipeId, shoppingListId);
+    } catch (error) {
+      console.error(
+        "Failed to add ingredients from recipe to shopping list:",
+        error
+      );
+    }
+  };
+
   return (
     <globalContext.Provider
       value={{
@@ -248,6 +286,7 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
         editUnitIngredientRecipe,
         editValueIngredientRecipe,
         deleteIngredientFromRecipe,
+        addIngredientToRecipe,
         fetchShoppingLists,
         addIngredientToShoppingList,
         addShoppingList,
@@ -256,6 +295,7 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
         fetchRecipes,
         editValueIngredientShoppingList,
         editUnitIngredientShoppingList,
+        addRecipeIngredientsToSL,
       }}
     >
       {children}

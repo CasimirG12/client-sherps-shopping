@@ -44,7 +44,7 @@ const ShoppingLists = () => {
         />
         <button
           type="submit"
-          className="w-1/6 bg-pink-500 rounded-md text-white font-bold py-1 active:scale-95 duration-200"
+          className="w-1/6 bg-yellow-400 rounded-md font-bold py-1 active:scale-95 duration-200"
         >
           add
         </button>

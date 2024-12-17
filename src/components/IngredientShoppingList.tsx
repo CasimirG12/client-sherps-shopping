@@ -20,6 +20,7 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
     editUnitIngredientShoppingList,
   } = useGlobalContext();
   const [quantityEdit, setQuantityEdit] = useState<boolean>(false);
+  const [bought, setBought] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +60,13 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
   }, [quantityEdit]);
 
   return (
-    <div className="border-b border-slate-800 flex flex-row justify-between items-center p-2">
+    <div
+      className={`
+        border-b border-slate-800 flex flex-row justify-between items-center p-2
+        ${bought ? "text-decoration-line: line-through" : null}
+      `}
+      onClick={() => setBought(!bought)}
+    >
       <div className="flex flex-row gap-2 justify-center items-center">
         {!quantityEdit ? (
           <p

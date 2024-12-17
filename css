@@ -1,0 +1,5 @@
+
+> sherpsbudget@0.0.0 build
+> tsc -b && vite build
+
+src/components/ActivityIndicator.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
