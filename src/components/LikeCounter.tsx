@@ -55,7 +55,7 @@ const LikeCounter: React.FC<LikeCounterProps> = ({ recipeId }) => {
   };
 
   return (
-    <div className="flex flex-row border border-white rounded-full px-2 py-1 items-center text-white w-fit text-sm">
+    <div className="flex flex-row border border-white rounded-full px-2 py-1 items-center text-white w-fit text-sm h-6">
       <button className="border-r px-1" onClick={() => handleVote("like")}>
         {userVote === "like" ? <FaThumbsUp /> : <FaRegThumbsUp />}
       </button>

@@ -38,6 +38,16 @@ const IngredientStep: React.FC<IngredientStepProps> = ({
     setEdit(false); // Exit edit mode
   };
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    e.preventDefault();
+    const newStep = e.target.value;
+    setEditedStep(newStep);
+    localStorage.setItem(`step${index}`, newStep);
+  };
+
   return (
     <div
       className="border-b border-b-slate-700 p-2 animate-slideDownHeight flex flex-row items-center gap-2"
@@ -46,14 +56,14 @@ const IngredientStep: React.FC<IngredientStepProps> = ({
     >
       <p className="font-bold text-slate-700">Step {index + 1}:</p>
       {!edit ? (
-        <p>{editedStep}</p>
+        <p className="text-gray-200">{editedStep}</p>
       ) : (
         <div className="relative flex flex-row items-center w-full">
           <input
             type="text"
             className="w-full py-2"
             value={editedStep}
-            onChange={(e) => setEditedStep(e.target.value)}
+            onChange={(e) => handleChange(e, index)}
             ref={inputRef} // Assign ref to the input field
           />
           <button

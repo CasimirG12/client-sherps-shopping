@@ -9,10 +9,15 @@ import Modal from "../../components/Modal";
 import ModalAddIngredient from "../../components/ModalAddIngredient";
 import LikeCounter from "../../components/LikeCounter";
 import { FaFloppyDisk } from "react-icons/fa6";
+import { updateStepsAPI } from "../../utils/recipeAPI";
 
 const RecipeDetail = () => {
-  const { recipes, addIngredientToRecipe, addRecipeIngredientsToSL } =
-    useGlobalContext();
+  const {
+    recipes,
+    setRecipes,
+    addIngredientToRecipe,
+    addRecipeIngredientsToSL,
+  } = useGlobalContext();
   const { id } = useParams();
   const [recipe, setRecipe] = useState<Recipe | undefined>(undefined);
 
@@ -70,11 +75,27 @@ const RecipeDetail = () => {
     return;
   };
 
+  const handleStepsSave = async (steps: string[]) => {
+    const stepsString = "$%>step<%$" + steps.join("$%>step<%$");
+    if (recipe) {
+      await updateStepsAPI(recipe.id, stepsString);
+      const updatedRecipes = recipes.map((recipeItem) => {
+        if (recipeItem.id === recipe.id) {
+          recipeItem.description = stepsString;
+          return recipeItem;
+        }
+        return recipeItem;
+      });
+      setRecipes(updatedRecipes);
+    }
+    setStepsChanged(false);
+  };
+
   return (
     <>
       {recipe && (
         <>
-          <div className="w-full h-[15vh] bg-slate-800 p-2 flex flex-col item-center justify-evenly">
+          <div className="w-full h-[15vh] bg-slate-800 p-2 flex flex-wrap gap-1 lg:flex-col lg:item-center lg:justify-evenly">
             <div className="flex flex-row items-center text-white gap-2">
               <FaArrowLeft
                 size={20}
@@ -83,7 +104,10 @@ const RecipeDetail = () => {
               />
               <p className="font-bold text-2xl">{recipe.name}</p>
             </div>
-            <p className="text-gray-500">created on: {recipe.dateCreated}</p>
+            <p className="text-gray-500">
+              created on:{" "}
+              {new Date(Number(recipe.dateCreated)).toLocaleString()}
+            </p>
             <p className="text-gray-500">created by: {recipe.username}</p>
             <LikeCounter recipeId={recipe.id} />
           </div>
@@ -112,7 +136,11 @@ const RecipeDetail = () => {
               <button onClick={() => addStep()}>
                 <FaPlus />
               </button>
-              <button disabled={!stepsChanged} className="disabled:opacity-20">
+              <button
+                disabled={!stepsChanged}
+                className="disabled:opacity-20"
+                onClick={() => handleStepsSave(steps)}
+              >
                 <FaFloppyDisk />
               </button>
             </div>
@@ -155,7 +183,7 @@ const RecipeDetail = () => {
         <Modal onClose={closeAddToSLModal} open={modalAddToSL}>
           <form
             onSubmit={() => {
-              if (recipe) addRecipeIngredientsToSL(recipe.id, 16);
+              if (recipe) addRecipeIngredientsToSL(recipe.id, 17);
             }}
           >
             <button type="submit">Add Ingredients</button>

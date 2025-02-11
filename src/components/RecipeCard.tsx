@@ -15,12 +15,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
   return (
     <div
       onClick={() => navigate(`/recipes/${recipe.id}`)}
-      className="active:scale-95 flex flex-row items-center justify-between duration-200 w-11/12  bg-slate-500 p-4 rounded-md shadow-black shadow-sm hover:cursor-pointer"
+      className="active:scale-95 flex flex-row items-center justify-between duration-200 w-11/12  bg-slate-300 p-4 rounded-md shadow-black shadow-sm hover:cursor-pointer"
     >
       <p>
         {recipe.name} created by {recipe.username}
       </p>
       <button
+        className="z-50"
         onClick={(e) => {
           e.stopPropagation();
           deleteRecipe(recipe.id);

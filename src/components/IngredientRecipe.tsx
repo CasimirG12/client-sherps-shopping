@@ -64,7 +64,7 @@ const IngredientRecipe: React.FC<IngredientRecipeProps> = ({
         {!quantityEdit ? (
           <p
             onClick={() => setQuantityEdit(true)}
-            className="hover:cursor-pointer"
+            className="text-gray-200 hover:cursor-pointer hover:text-gray-400"
           >
             {item.quantity}
           </p>
@@ -84,7 +84,7 @@ const IngredientRecipe: React.FC<IngredientRecipeProps> = ({
           ingredientId={item.id}
           editUnitIngredientLocation={editUnitIngredientRecipe}
         />
-        <p>{item.name}</p>
+        <p className="text-gray-200">{item.name}</p>
       </div>
       <FaTrash onClick={() => deleteIngredientFromRecipe(recipe.id, item.id)} />
     </div>

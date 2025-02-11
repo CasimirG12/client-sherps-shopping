@@ -1,5 +1,3 @@
-import React from "react";
-
 const ActivityIndicator = () => {
   return (
     <div className="relative flex items-center space-x-2">

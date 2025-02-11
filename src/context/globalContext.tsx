@@ -11,6 +11,7 @@ import {
   editUnitIngredientRecipeAPI,
   editValueIngredientRecipeAPI,
   fetchRecipesAPI,
+  postRecipeAPI,
 } from "../utils/recipeAPI";
 import {
   _removeIngredientFromList,
@@ -23,10 +24,14 @@ import {
   fetchShoppingListsAPI,
 } from "../utils/shoppingListAPI";
 import { MeasureUnit } from "../types/ingredient";
+import { fetchPopIngredientsAPI } from "../utils/ingredientsAPI";
 
 export type GlobalContextType = {
   shoppingLists: ShoppingList[];
   recipes: Recipe[];
+  popularIngredients: string[];
+  fetchPopIngredients: () => Promise<void>;
+  setRecipes: React.Dispatch<React.SetStateAction<Recipe[]>>;
   fetchShoppingLists: () => Promise<void>;
   fetchRecipes: () => Promise<void>;
   deleteRecipe: (id: number) => Promise<void>;
@@ -54,6 +59,7 @@ export type GlobalContextType = {
     ingredientName: string,
     quantity: number
   ) => Promise<void>;
+  postRecipe: (name: string, user_id: number) => Promise<void>;
   addShoppingList: (slName: string) => Promise<void>;
   deleteShoppingList: (id: number) => Promise<void>;
   deleteIngredientFromShoppingList: (
@@ -89,6 +95,7 @@ export const useGlobalContext = () => {
 const GlobalProvider = ({ children }: { children: ReactNode }) => {
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [popularIngredients, setPopularIngredients] = useState<string[]>([]);
   const { user } = useAuthContext();
 
   const fetchShoppingLists = async (): Promise<void> => {
@@ -101,6 +108,15 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Failed to fetch Shopping Lists: ", error);
       return;
+    }
+  };
+
+  const fetchPopIngredients = async (): Promise<void> => {
+    const popIngredients = await fetchPopIngredientsAPI();
+    if (popIngredients.length > 0) {
+      setPopularIngredients(popIngredients);
+    } else {
+      console.warn("No popular ingredients found.");
     }
   };
 
@@ -156,6 +172,15 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
       await fetchShoppingLists();
     } catch (error) {
       console.error("Failed to add shopping list: ", error);
+    }
+  };
+
+  const postRecipe = async (name: string, user_id: number) => {
+    try {
+      await postRecipeAPI(name, user_id);
+      await fetchRecipes();
+    } catch (error) {
+      console.error("Failed to post recipe:", error);
     }
   };
 
@@ -282,6 +307,10 @@ const GlobalProvider = ({ children }: { children: ReactNode }) => {
       value={{
         shoppingLists,
         recipes,
+        popularIngredients,
+        fetchPopIngredients,
+        setRecipes,
+        postRecipe,
         deleteRecipe,
         editUnitIngredientRecipe,
         editValueIngredientRecipe,

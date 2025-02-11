@@ -5,6 +5,7 @@ import { ShoppingList } from "../../types/shoppingList";
 import { FaArrowLeft, FaPlus } from "react-icons/fa";
 import Modal from "../../components/Modal";
 import IngredientShoppingList from "../../components/IngredientShoppingList";
+import Input from "../../components/Input";
 
 const ShoppingListDetail = () => {
   const [shoppingList, setShoppingList] = useState<ShoppingList | undefined>(
@@ -16,7 +17,8 @@ const ShoppingListDetail = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<undefined | number>(undefined);
-  const { shoppingLists, addIngredientToShoppingList } = useGlobalContext();
+  const { shoppingLists, addIngredientToShoppingList, popularIngredients } =
+    useGlobalContext();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -100,14 +102,37 @@ const ShoppingListDetail = () => {
                 onSubmit={(e) => onOpen(e)}
                 className="flex flex-row gap-2 items-center justify-center"
               >
-                <input
-                  name="searchparam"
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  placeholder="Search for item..."
-                  className="bg-slate-700 text-white w-10/12 p-2 rounded-md"
-                />
+                <div className="w-full relative">
+                  <Input
+                    labelBackground="bg-slate-800"
+                    inputName="Search Item"
+                    name="searchparam"
+                    onChange={(e) => handleSearchChange(e)}
+                    value={searchTerm}
+                  />
+                  <div
+                    className={`absolute flex flex-col justify-start bg-slate-200 rounded-md p-2 ${
+                      searchTerm && !popularIngredients.includes(searchTerm)
+                        ? ""
+                        : "hidden"
+                    }`}
+                  >
+                    {searchTerm &&
+                      popularIngredients
+                        .filter((item) =>
+                          item.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .map((item) => (
+                          <div
+                            key={item}
+                            className="hover:cursor-pointer"
+                            onClick={() => setSearchTerm(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                  </div>
+                </div>
                 <button type="submit">
                   <FaPlus color="white" />
                 </button>

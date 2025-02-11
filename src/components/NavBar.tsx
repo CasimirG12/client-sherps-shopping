@@ -1,12 +1,13 @@
 import { Link, NavLink } from "react-router";
 import { useAuthContext } from "../context/authContext";
+import AnimatedButton from "./AnimatedButton";
 
 const NavBar = () => {
   const { logout } = useAuthContext();
 
   return (
-    <nav className="w-full flex flex-row items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900 shadow-sm py-2 text-white shadow-slate-600 h-[5vh]">
-      <div className="flex flex-row items-center gap-2 mx-2">
+    <nav className="w-full flex items-center justify-between bg-gradient-to-r from-slate-800 to-slate-900 shadow-sm py-2 text-white shadow-slate-600 h-[5vh]">
+      <div className="h-full flex items-center gap-2 mx-2 overflow-x-auto whitespace-nowrap">
         <NavLink
           to="/home"
           className={({ isActive }) =>
@@ -41,9 +42,9 @@ const NavBar = () => {
         </NavLink>
       </div>
       <Link to="/login" onClick={() => logout()} className="mr-2">
-        <p className="border-white border px-2 rounded-full hover:bg-slate-700/40">
+        <AnimatedButton className="flex justify-center border-white border px-2 rounded-full hover:bg-slate-700/40 w-[80px]">
           Log Out
-        </p>
+        </AnimatedButton>
       </Link>
     </nav>
   );

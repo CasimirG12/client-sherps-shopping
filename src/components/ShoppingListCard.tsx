@@ -20,18 +20,18 @@ const ShoppingListCard: React.FC<ShoppingListCardProps> = ({
   };
 
   return (
-    <button
-      className="w-11/12 py-4 px-2 bg-slate-500 rounded-md flex flex-row items-center justify-between shadow-md shadow-gray-800 gap-2 active:scale-95 active:shadow-sm duration-200 font-bold"
+    <div
+      className="w-11/12 py-4 px-2 bg-slate-300 rounded-md flex flex-row items-center justify-between shadow-md shadow-gray-800 gap-2 active:scale-95 active:shadow-sm duration-200 font-bold"
       onClick={() => navigate(`/shopping-lists/${shoppingList.id}`)}
     >
       <div className="flex flex-row gap-2 items-center">
-        <FaShoppingBasket size={25} className="text-white" />
+        <FaShoppingBasket size={25} className="text-slate-400" />
         {shoppingList.name}
       </div>
       <button onClick={(e) => handleDelete(e)}>
         <FaTrash size={25} className="text-red-500" />
       </button>
-    </button>
+    </div>
   );
 };
 

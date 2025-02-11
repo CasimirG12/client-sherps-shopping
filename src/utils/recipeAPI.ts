@@ -26,8 +26,34 @@ export const fetchRecipesAPI = async (userId: number): Promise<Recipe[]> => {
   }
 };
 
+export const postRecipeAPI = async (name: string, user_id: number): Promise<void> => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/recipes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: name,
+        user_id: user_id,
+      }),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+
+  } catch (error) {
+    console.error("Failed to post recipe: ", error);
+  }
+}
+
 export const deleteRecipeAPI = async (id: number): Promise<void> => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  
   try {
     const response = await fetch(`${API_BASE_URL}/api/recipes/`, {
       method: "DELETE",
@@ -134,9 +160,10 @@ export const deleteIngredientFromRecipeAPI = async (
   ingredientId: number
 ): Promise<void> => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/shopping-lists/ingredients/${recipeId}/${ingredientId}`,
+      `${API_BASE_URL}/api/recipes/ingredients/${recipeId}/${ingredientId}`,
       {
         method: "DELETE",
         credentials: "include",
@@ -157,6 +184,7 @@ export const addIngredientToRecipeAPI = async (
   quantity: number
 ): Promise<void> => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/recipes/${recipeId}/ingredients`,
@@ -184,8 +212,9 @@ export const addIngredientToRecipeAPI = async (
 
 export const addRecipeIngredientsToSLAPI = async (recipeId: number, shoppingListId: number): Promise<void> => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  
   try {
-    const response = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}/shopping_lists/${shoppingListId}/ingredients`,{
+    const response = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}/shopping_lists/${shoppingListId}/ingredients`, {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -198,5 +227,29 @@ export const addRecipeIngredientsToSLAPI = async (recipeId: number, shoppingList
     }
   } catch (error) {
     console.error("Failed to add ingredients from recipe to shopping list:", error);
+  }
+}
+
+export const updateStepsAPI = async (recipeId: number, steps: string): Promise<void> => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}/description`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        description: steps,
+      }),
+      credentials: "include",
+    });
+
+    if  (!response.ok) {
+      throw new Error(`Error: ${response.status} - ${response.statusText}`);
+    }
+
+  } catch (error) {
+    console.error("Failed to update the description:", error)
   }
 }

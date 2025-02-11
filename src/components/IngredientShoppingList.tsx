@@ -71,7 +71,7 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
         {!quantityEdit ? (
           <p
             onClick={() => setQuantityEdit(true)}
-            className="hover:cursor-pointer"
+            className="hover:cursor-pointer text-gray-200"
           >
             {item.quantity}
           </p>
@@ -91,7 +91,7 @@ const IngredientShoppingList: React.FC<IngredientShoppingListProps> = ({
           ingredientId={item.id}
           editUnitIngredientLocation={editUnitIngredientShoppingList}
         />
-        <p>{item.name}</p>
+        <p className="text-gray-200">{item.name}</p>
       </div>
       <FaTrash
         onClick={() =>
